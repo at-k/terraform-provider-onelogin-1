@@ -13,42 +13,44 @@ import (
 // Users returns a resource with the CRUD methods and Terraform Schema defined
 func UserCustomAttribute() *schema.Resource {
 	return &schema.Resource{
-		Create:   userCustomAttributeCreate,
-		Read:     userCustomAttributeRead,
-		Update:   userCustomAttributeUpdate,
-		Delete:   userCustomAttributeDelete,
-		Schema:   map[string]*schema.Schema{
+		Create: userCustomAttributeCreate,
+		Read:   userCustomAttributeRead,
+		Update: userCustomAttributeUpdate,
+		Delete: userCustomAttributeDelete,
+		Schema: map[string]*schema.Schema{
 			"user_id": {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-      "custom_attributes": &schema.Schema{
-        Type:     schema.TypeMap,
-        Optional: true,
-        Elem:     &schema.Schema{Type: schema.TypeString},
-      },
-    },
+			"custom_attributes": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+		},
 	}
 }
 
 func userCustomAttributeCreate(d *schema.ResourceData, m interface{}) error {
-  return userCustomAttributeUpdate(d,m)
+	return userCustomAttributeUpdate(d, m)
 }
 
 func userCustomAttributeUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.APIClient)
 
-  userId := d.Get("user_id")
-  attrs := d.Get("custom_attributes")
+	userId := d.Get("user_id")
+	attrs := d.Get("custom_attributes")
 
-  user, err := client.Services.UsersV2.GetOne(int32(userId.(int)))
+	user, err := client.Services.UsersV2.GetOne(int32(userId.(int)))
 	if err != nil {
 		log.Printf("[ERROR] There was a problem reading the user!")
 		log.Println(err)
 		return err
 	}
 
-  user.CustomAttributes = attrs.(map[string]interface{})
+	for k, v := range attrs.(map[string]interface{}) {
+		user.CustomAttributes[k] = v
+	}
 
 	err = client.Services.UsersV2.Update(user)
 	if err != nil {
@@ -64,6 +66,8 @@ func userCustomAttributeUpdate(d *schema.ResourceData, m interface{}) error {
 func userCustomAttributeRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*client.APIClient)
 	uid, _ := strconv.Atoi(d.Id())
+	attrs := d.Get("custom_attributes")
+
 	user, err := client.Services.UsersV2.GetOne(int32(uid))
 	if err != nil {
 		log.Printf("[ERROR] There was a problem reading the user!")
@@ -76,7 +80,11 @@ func userCustomAttributeRead(d *schema.ResourceData, m interface{}) error {
 	}
 	log.Printf("[READ] Reading user with %d", *(user.ID))
 
-	d.Set("custom_attributes", user.CustomAttributes)
+	for k := range attrs.(map[string]interface{}) {
+		attrs.(map[string]interface{})[k] = user.CustomAttributes[k]
+	}
+
+	d.Set("custom_attributes", attrs)
 
 	return nil
 }

@@ -57,7 +57,7 @@ func Provider() *schema.Provider {
 			"onelogin_smarthooks":                      SmartHooks(),
 			"onelogin_smarthook_environment_variables": SmarthookEnvironmentVariables(),
 			"onelogin_privileges":                      Privileges(),
-      "onelogin_user_custom_attributes":          UserCustomAttribute(),
+			"onelogin_user_custom_attributes":          UserCustomAttribute(),
 		},
 		ConfigureContextFunc: configProvider,
 	}
