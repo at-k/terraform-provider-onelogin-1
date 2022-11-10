@@ -12,3 +12,6 @@ require (
 	golang.org/x/sys v0.0.0-20210608053332-aa57babbf139 // indirect
 	golang.org/x/text v0.3.6 // indirect; indirectgithub.com/hashicorp/terraform-plugin-sdk/v2 v2.4.3
 )
+
+// replace github.com/onelogin/onelogin-go-sdk v1.1.20 => ../onelogin-go-sdk
+replace github.com/onelogin/onelogin-go-sdk v1.1.20 => github.com/at-k/onelogin-go-sdk v1.0.15-0.20221101103045-fdf2104ca1dd
