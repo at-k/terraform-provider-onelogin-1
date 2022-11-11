@@ -127,11 +127,24 @@ func removeUserRoleAttachment(client *client.APIClient, userIDs interface{}, rol
 	}
 
 	svc := client.Services.RolesV1
-	_, err := svc.Repository.Destroy(olhttp.OLHTTPRequest{
-		URL:        fmt.Sprintf("%s/%d/users", svc.Endpoint, int32(roleID.(int))),
-		Headers:    map[string]string{"Content-Type": "application/json"},
-		AuthMethod: "bearer",
-		Payload:    &payload,
-	})
-	return err
+  slice := 20 // for payload limit
+  for i := slice; len(payload) > 0; {
+    if len(payload) < slice {
+      i = len(payload)
+    }
+    target := payload[:i]
+    payload = payload[i:]
+
+	  _, err := svc.Repository.Destroy(olhttp.OLHTTPRequest{
+	  	URL:        fmt.Sprintf("%s/%d/users", svc.Endpoint, int32(roleID.(int))),
+	  	Headers:    map[string]string{"Content-Type": "application/json"},
+	  	AuthMethod: "bearer",
+	  	Payload:    &target,
+	  })
+
+    if err != nil {
+      return err
+    }
+  }
+	return nil
 }
