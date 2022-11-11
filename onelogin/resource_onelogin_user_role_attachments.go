@@ -71,12 +71,22 @@ func userRoleAttachmentUpdate(d *schema.ResourceData, m interface{}) error {
 	oldRole, newRole := d.GetChange("role_id")
 	oldUsers, newUsers := d.GetChange("users")
 
+	os := oldUsers.(*schema.Set)
+	ns := newUsers.(*schema.Set)
+	removedUsers := os.Difference(ns)
+	addedUsers := ns.Difference(os)
+
+  if newRole != oldRole {
+    removedUsers = oldRole.(*schema.Set)
+    addedUsers = newUsers.(*schema.Set)
+  }
+
 	var err error
-	if err = removeUserRoleAttachment(client, oldUsers, oldRole); err != nil {
+	if err = removeUserRoleAttachment(client, removedUsers, oldRole); err != nil {
 		return fmt.Errorf("Unable to delete mapping %s", err)
 	}
 
-	if err = updateUserRoleAttachment(client, newUsers, newRole); err != nil {
+	if err = updateUserRoleAttachment(client, addedUsers, newRole); err != nil {
 		return fmt.Errorf("Unable to update mapping %s", err)
 	}
 
@@ -127,7 +137,7 @@ func removeUserRoleAttachment(client *client.APIClient, userIDs interface{}, rol
 	}
 
 	svc := client.Services.RolesV1
-  slice := 20 // for payload limit
+  slice := 10 // for payload limit
   for i := slice; len(payload) > 0; {
     if len(payload) < slice {
       i = len(payload)
