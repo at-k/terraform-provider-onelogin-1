@@ -76,10 +76,10 @@ func userRoleAttachmentUpdate(d *schema.ResourceData, m interface{}) error {
 	removedUsers := os.Difference(ns)
 	addedUsers := ns.Difference(os)
 
-  if newRole != oldRole {
-    removedUsers = oldRole.(*schema.Set)
-    addedUsers = newUsers.(*schema.Set)
-  }
+	if newRole != oldRole {
+		removedUsers = oldRole.(*schema.Set)
+		addedUsers = newUsers.(*schema.Set)
+	}
 
 	var err error
 	if err = removeUserRoleAttachment(client, removedUsers, oldRole); err != nil {
@@ -137,24 +137,24 @@ func removeUserRoleAttachment(client *client.APIClient, userIDs interface{}, rol
 	}
 
 	svc := client.Services.RolesV1
-  slice := 10 // for payload limit
-  for i := slice; len(payload) > 0; {
-    if len(payload) < slice {
-      i = len(payload)
-    }
-    target := payload[:i]
-    payload = payload[i:]
+	slice := 10 // for payload limit
+	for i := slice; len(payload) > 0; {
+		if len(payload) < slice {
+			i = len(payload)
+		}
+		target := payload[:i]
+		payload = payload[i:]
 
-	  _, err := svc.Repository.Destroy(olhttp.OLHTTPRequest{
-	  	URL:        fmt.Sprintf("%s/%d/users", svc.Endpoint, int32(roleID.(int))),
-	  	Headers:    map[string]string{"Content-Type": "application/json"},
-	  	AuthMethod: "bearer",
-	  	Payload:    &target,
-	  })
+		_, err := svc.Repository.Destroy(olhttp.OLHTTPRequest{
+			URL:        fmt.Sprintf("%s/%d/users", svc.Endpoint, int32(roleID.(int))),
+			Headers:    map[string]string{"Content-Type": "application/json"},
+			AuthMethod: "bearer",
+			Payload:    &target,
+		})
 
-    if err != nil {
-      return err
-    }
-  }
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
