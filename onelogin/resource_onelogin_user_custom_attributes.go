@@ -72,7 +72,9 @@ func userCustomAttributeRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		log.Printf("[ERROR] There was a problem reading the user!")
 		log.Println(err)
-		return err
+
+		d.SetId("")
+		return nil
 	}
 	if user == nil {
 		d.SetId("")
